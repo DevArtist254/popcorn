@@ -301,6 +301,9 @@ body {
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .btn-add:hover {
