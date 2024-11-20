@@ -4,7 +4,7 @@ import Stars from "../../Star";
 
 import { KEY } from "../../App";
 
-export default function MovieDetails({ id }) {
+export default function MovieDetails({ id, addToWatched, closeDetails }) {
   const [details, setDetails] = useState({});
   const [loading, isLoading] = useState(false);
 
@@ -32,7 +32,9 @@ export default function MovieDetails({ id }) {
       ) : (
         <div className="details">
           <header>
-            <button className="btn-back">&larr;</button>
+            <button className="btn-back" onClick={() => closeDetails()}>
+              &larr;
+            </button>
           </header>
           <section className="details-overview">
             <img src={details.Poster} alt="movie" />
@@ -52,7 +54,7 @@ export default function MovieDetails({ id }) {
             <p>{details.Actors}</p>
           </section>
           <div className="rating">
-            <button className="btn-add">
+            <button className="btn-add" onClick={() => addToWatched(details)}>
               <h2>Add your rating</h2>
               <Stars maxRating={10} />
             </button>

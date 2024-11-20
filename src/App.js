@@ -20,10 +20,15 @@ export const KEY = "d5c358a1";
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function () {
+    const convertedWatched = localStorage.getItem("watched");
+    return JSON.parse(convertedWatched) || [];
+  });
   const [loading, isLoading] = useState(false);
   const [err, setErr] = useState("");
   const [movieId, setMovieId] = useState("");
+
+  const controller = new AbortController();
 
   useEffect(
     function () {
@@ -33,7 +38,8 @@ export default function App() {
           setErr("");
 
           const res = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,
+            {signal : controller.signal}
           );
           if (!res.ok) throw new Error("There was a issue with your data");
 
@@ -41,8 +47,11 @@ export default function App() {
           if (data.Error) throw new Error(data.Error);
 
           setMovies(data.Search);
+          setErr("");
         } catch (e) {
-          setErr(e.message);
+          if(e.name !== "AbortError"){
+            setErr(e.message);
+          }
         } finally {
           isLoading(false);
         }
@@ -55,11 +64,27 @@ export default function App() {
       }
 
       loadMovies();
+
+      return function () {
+        controller.abort();
+      }
     },
     [query]
   );
 
-  console.log(movieId);
+  useEffect(function () {
+    const convertedWatched = JSON.stringify(watched);
+    localStorage.setItem("watched", convertedWatched);
+  }, [watched]);
+
+  function handleCloseDetails() {
+    setMovieId("");
+  }
+
+  function handleWatched(details) {
+    setWatched((movies) => [...movies, details]);
+  }
+  
 
   return (
     <>
@@ -76,7 +101,17 @@ export default function App() {
           )}
           {err && <ErrorMessage message={err} />}
         </Box>
-        <Box>{movieId ? <MovieDetails id={movieId} /> : <Watched watched={watched} />}</Box>
+        <Box>
+          {movieId ? (
+            <MovieDetails
+              id={movieId}
+              addToWatched={handleWatched}
+              closeDetails={handleCloseDetails}
+            />
+          ) : (
+            <Watched watched={watched} />
+          )}
+        </Box>
       </Main>
     </>
   );
