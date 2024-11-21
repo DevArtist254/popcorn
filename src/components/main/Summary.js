@@ -4,7 +4,7 @@ const average = (arr) =>
 export default function Summary({ watch }) {
   const avgImdbRating = average(watch.map((movie) => movie.imdbRating));
   const avgUserRating = average(watch.map((movie) => movie.userRating));
-  const avgRuntime = average(watch.map((movie) => movie.runtime));
+  const avgRuntime = average(watch.map((movie) => Number(movie.Runtime.split(' ')[0])));
 
   return (
     <div className="summary">
